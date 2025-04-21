@@ -8,11 +8,13 @@ public class JohnMove : MonoBehaviour
     private Animator Animator;
     private float Horizontal;
     private bool Grounded;
+    private Vector3 initialPosition;
 
     void Start()
     {
         Rigidbody2D = GetComponent<Rigidbody2D>();
         Animator = GetComponent<Animator>();
+        initialPosition = transform.position; // Guardamos posici�n inicial
     }
     void Update()
     {
@@ -32,6 +34,13 @@ public class JohnMove : MonoBehaviour
         {
             Jump();
         }
+
+        if (!IsVisibleFrom(GetComponent<Renderer>(), Camera.main))
+        {
+            // Si no es visible, regresa a la posici�n inicial
+            transform.position = initialPosition;
+            Rigidbody2D.linearVelocity = Vector2.zero; // Reinicia velocidad
+        }
     }
 
     void Jump()
@@ -42,5 +51,11 @@ public class JohnMove : MonoBehaviour
     void FixedUpdate()
     {
         Rigidbody2D.linearVelocity = new Vector2(Horizontal, Rigidbody2D.linearVelocity.y);
+    }
+
+    bool IsVisibleFrom(Renderer renderer, Camera camera)
+    {
+        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
+        return GeometryUtility.TestPlanesAABB(planes, renderer.bounds);
     }
 }
